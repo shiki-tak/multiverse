@@ -1,0 +1,8 @@
+# OS
+.DS_Store
+.vscode
+.idea
+
+# Build
+vendor
+build
