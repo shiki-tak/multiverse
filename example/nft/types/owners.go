@@ -97,22 +97,22 @@ func (idCollections IDCollections) find(denom string) int {
 	return FindUtil(idCollections, denom)
 }
 
-// Owner of non fungible tokens
-type Owner struct {
+// NFTOwner of non fungible tokens
+type NFTOwner struct {
 	Address       sdk.AccAddress `json:"address" yaml:"address"`
 	IDCollections IDCollections  `json:"idCollections" yaml:"idCollections"`
 }
 
-// NewOwner creates a new Owner
-func NewOwner(owner sdk.AccAddress, idCollections ...IDCollection) Owner {
-	return Owner{
+// NewOwner creates a new NFTOwner
+func NewOwner(owner sdk.AccAddress, idCollections ...IDCollection) NFTOwner {
+	return NFTOwner{
 		Address:       owner,
 		IDCollections: idCollections,
 	}
 }
 
-// Supply gets the total supply of an Owner
-func (owner Owner) Supply() int {
+// Supply gets the total supply of an NFTOwner
+func (owner NFTOwner) Supply() int {
 	total := 0
 	for _, idCollection := range owner.IDCollections {
 		total += idCollection.Supply()
@@ -121,7 +121,7 @@ func (owner Owner) Supply() int {
 }
 
 // GetIDCollection gets the IDCollection from the owner
-func (owner Owner) GetIDCollection(denom string) (IDCollection, bool) {
+func (owner NFTOwner) GetIDCollection(denom string) (IDCollection, bool) {
 	index := owner.IDCollections.find(denom)
 	if index == -1 {
 		return IDCollection{}, false
@@ -130,7 +130,7 @@ func (owner Owner) GetIDCollection(denom string) (IDCollection, bool) {
 }
 
 // UpdateIDCollection updates the ID Collection of an owner
-func (owner Owner) UpdateIDCollection(idCollection IDCollection) (Owner, error) {
+func (owner NFTOwner) UpdateIDCollection(idCollection IDCollection) (NFTOwner, error) {
 	denom := idCollection.Denom
 	index := owner.IDCollections.find(denom)
 	if index == -1 {
@@ -145,7 +145,7 @@ func (owner Owner) UpdateIDCollection(idCollection IDCollection) (Owner, error) 
 }
 
 // DeleteID deletes an ID from an owners ID Collection
-func (owner Owner) DeleteID(denom string, id string) (Owner, error) {
+func (owner NFTOwner) DeleteID(denom string, id string) (NFTOwner, error) {
 	idCollection, found := owner.GetIDCollection(denom)
 	if !found {
 		return owner, sdkerrors.Wrap(ErrUnknownNFT,
@@ -164,7 +164,7 @@ func (owner Owner) DeleteID(denom string, id string) (Owner, error) {
 }
 
 // String follows stringer interface
-func (owner Owner) String() string {
+func (owner NFTOwner) String() string {
 	return fmt.Sprintf(`
 	Address: 				%s
 	IDCollections:        	%s`,

@@ -30,7 +30,7 @@ func TestBaseNFTSetMethods(t *testing.T) {
 func TestBaseNFTStringFormat(t *testing.T) {
 	testNFT := NewBaseNFT(id, address, tokenURI)
 	expected := fmt.Sprintf(`ID:				%s
-Owner:			%s
+NFTOwner:			%s
 TokenURI:		%s`,
 		id, address, tokenURI)
 	require.Equal(t, expected, testNFT.String())
@@ -170,7 +170,7 @@ func TestNFTsStringMethod(t *testing.T) {
 	testNFT := NewBaseNFT(id, address, tokenURI)
 	nfts := NewNFTs(&testNFT)
 	require.Equal(t, nfts.String(), fmt.Sprintf(`ID:				%s
-Owner:			%s
+NFTOwner:			%s
 TokenURI:		%s`, id, address, tokenURI))
 }
 

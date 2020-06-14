@@ -141,10 +141,10 @@ func TestCollectionStringMethod(t *testing.T) {
 NFTs:
 
 ID:				%s
-Owner:			%s
+NFTOwner:			%s
 TokenURI:		%s
 ID:				%s
-Owner:			%s
+NFTOwner:			%s
 TokenURI:		%s`, denom, id, address.String(), tokenURI,
 			id2, address2.String(), tokenURI2))
 }
@@ -259,13 +259,13 @@ func TestCollectionsStringMethod(t *testing.T) {
 NFTs:
 
 ID:				%s
-Owner:			%s
+NFTOwner:			%s
 TokenURI:		%s
 Denom: 				%s
 NFTs:
 
 ID:				%s
-Owner:			%s
+NFTOwner:			%s
 TokenURI:		%s`, denom, id, address.String(), tokenURI,
 		denom2, id2, address2.String(), tokenURI2), collections.String())
 }

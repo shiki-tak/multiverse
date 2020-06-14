@@ -119,7 +119,7 @@ $ %s query %s owner cosmos1gghjut3ccd8ay0zduzj64hwre2fxs9ld75ru9p crypto-kitties
 				return err
 			}
 
-			var out types.Owner
+			var out types.NFTOwner
 			err = cdc.UnmarshalJSON(res, &out)
 			if err != nil {
 				return err

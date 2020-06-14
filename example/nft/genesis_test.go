@@ -21,7 +21,7 @@ func TestInitGenesis(t *testing.T) {
 
 	owner2 := nft.NewOwner(address2, idCollection2)
 
-	owners := []nft.Owner{owner, owner2}
+	owners := []nft.NFTOwner{owner, owner2}
 
 	nft1 := nft.NewBaseNFT(id, address, tokenURI1)
 	nft2 := nft.NewBaseNFT(id2, address, tokenURI1)

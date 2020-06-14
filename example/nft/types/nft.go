@@ -15,7 +15,7 @@ var _ exported.NFT = (*BaseNFT)(nil)
 // BaseNFT non fungible token definition
 type BaseNFT struct {
 	ID       string         `json:"id,omitempty" yaml:"id"`     // id of the token; not exported to clients
-	Owner    sdk.AccAddress `json:"owner" yaml:"owner"`         // account address that owns the NFT
+	NFTOwner    sdk.AccAddress `json:"owner" yaml:"owner"`         // account address that owns the NFT
 	TokenURI string         `json:"token_uri" yaml:"token_uri"` // optional extra properties available for querying
 }
 
@@ -23,7 +23,7 @@ type BaseNFT struct {
 func NewBaseNFT(id string, owner sdk.AccAddress, tokenURI string) BaseNFT {
 	return BaseNFT{
 		ID:       id,
-		Owner:    owner,
+		NFTOwner:    owner,
 		TokenURI: strings.TrimSpace(tokenURI),
 	}
 }
@@ -32,11 +32,11 @@ func NewBaseNFT(id string, owner sdk.AccAddress, tokenURI string) BaseNFT {
 func (bnft BaseNFT) GetID() string { return bnft.ID }
 
 // GetOwner returns the account address that owns the NFT
-func (bnft BaseNFT) GetOwner() sdk.AccAddress { return bnft.Owner }
+func (bnft BaseNFT) GetOwner() sdk.AccAddress { return bnft.NFTOwner }
 
 // SetOwner updates the owner address of the NFT
 func (bnft *BaseNFT) SetOwner(address sdk.AccAddress) {
-	bnft.Owner = address
+	bnft.NFTOwner = address
 }
 
 // GetTokenURI returns the path to optional extra properties
@@ -49,10 +49,10 @@ func (bnft *BaseNFT) EditMetadata(tokenURI string) {
 
 func (bnft BaseNFT) String() string {
 	return fmt.Sprintf(`ID:				%s
-Owner:			%s
+NFTOwner:			%s
 TokenURI:		%s`,
 		bnft.ID,
-		bnft.Owner,
+		bnft.NFTOwner,
 		bnft.TokenURI,
 	)
 }

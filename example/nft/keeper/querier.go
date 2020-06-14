@@ -69,7 +69,7 @@ func queryOwner(ctx sdk.Context, path []string, req abci.RequestQuery, k Keeper)
 		return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, err.Error())
 	}
 
-	owner := k.GetOwner(ctx, params.Owner)
+	owner := k.GetOwner(ctx, params.NFTOwner)
 	bz, err := types.ModuleCdc.MarshalJSON(owner)
 	if err != nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error())
@@ -86,10 +86,10 @@ func queryOwnerByDenom(ctx sdk.Context, path []string, req abci.RequestQuery, k 
 		return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, err.Error())
 	}
 
-	var owner types.Owner
+	var owner types.NFTOwner
 
-	idCollection, _ := k.GetOwnerByDenom(ctx, params.Owner, params.Denom)
-	owner.Address = params.Owner
+	idCollection, _ := k.GetOwnerByDenom(ctx, params.NFTOwner, params.Denom)
+	owner.Address = params.NFTOwner
 	owner.IDCollections = append(owner.IDCollections, idCollection).Sort()
 
 	bz, err := types.ModuleCdc.MarshalJSON(owner)

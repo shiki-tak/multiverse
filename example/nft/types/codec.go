@@ -13,7 +13,7 @@ func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(&BaseNFT{}, "cosmos-sdk/BaseNFT", nil)
 	cdc.RegisterConcrete(&IDCollection{}, "cosmos-sdk/IDCollection", nil)
 	cdc.RegisterConcrete(&Collection{}, "cosmos-sdk/Collection", nil)
-	cdc.RegisterConcrete(&Owner{}, "cosmos-sdk/Owner", nil)
+	cdc.RegisterConcrete(&NFTOwner{}, "cosmos-sdk/NFTOwner", nil)
 	cdc.RegisterConcrete(MsgTransferNFT{}, "cosmos-sdk/MsgTransferNFT", nil)
 	cdc.RegisterConcrete(MsgEditNFTMetadata{}, "cosmos-sdk/MsgEditNFTMetadata", nil)
 	cdc.RegisterConcrete(MsgMintNFT{}, "cosmos-sdk/MsgMintNFT", nil)

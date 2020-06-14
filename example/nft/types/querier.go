@@ -25,7 +25,7 @@ func (q QueryCollectionParams) Bytes() []byte {
 
 // QueryBalanceParams params for query 'custom/nfts/balance'
 type QueryBalanceParams struct {
-	Owner sdk.AccAddress
+	NFTOwner sdk.AccAddress
 	Denom string // optional
 }
 
@@ -33,11 +33,11 @@ type QueryBalanceParams struct {
 func NewQueryBalanceParams(owner sdk.AccAddress, denom ...string) QueryBalanceParams {
 	if len(denom) > 0 {
 		return QueryBalanceParams{
-			Owner: owner,
+			NFTOwner: owner,
 			Denom: denom[0],
 		}
 	}
-	return QueryBalanceParams{Owner: owner}
+	return QueryBalanceParams{NFTOwner: owner}
 }
 
 // QueryNFTParams params for query 'custom/nfts/nft'

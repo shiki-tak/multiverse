@@ -6,12 +6,12 @@ import (
 
 // GenesisState is the state that must be provided at genesis.
 type GenesisState struct {
-	Owners      []Owner     `json:"owners"`
+	Owners      []NFTOwner     `json:"owners"`
 	Collections Collections `json:"collections"`
 }
 
 // NewGenesisState creates a new genesis state.
-func NewGenesisState(owners []Owner, collections Collections) GenesisState {
+func NewGenesisState(owners []NFTOwner, collections Collections) GenesisState {
 	return GenesisState{
 		Owners:      owners,
 		Collections: collections,
@@ -20,14 +20,14 @@ func NewGenesisState(owners []Owner, collections Collections) GenesisState {
 
 // DefaultGenesisState returns a default genesis state
 func DefaultGenesisState() GenesisState {
-	return NewGenesisState([]Owner{}, NewCollections())
+	return NewGenesisState([]NFTOwner{}, NewCollections())
 }
 
 // ValidateGenesis performs basic validation of nfts genesis data returning an
 // error for any failed validation criteria.
 func ValidateGenesis(data GenesisState) error {
-	for _, Owner := range data.Owners {
-		if Owner.Address.Empty() {
+	for _, NFTOwner := range data.Owners {
+		if NFTOwner.Address.Empty() {
 			return sdkerrors.Wrap(sdkerrors.ErrInvalidAddress, "address cannot be empty")
 		}
 	}

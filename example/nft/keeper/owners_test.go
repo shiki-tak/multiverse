@@ -94,7 +94,7 @@ func TestSetOwners(t *testing.T) {
 	oldOwner2 := app.NFTKeeper.GetOwner(ctx, address2)
 
 	// replace previous old owners with updated versions (that have multiple ids)
-	app.NFTKeeper.SetOwners(ctx, []types.Owner{owner, owner2})
+	app.NFTKeeper.SetOwners(ctx, []types.NFTOwner{owner, owner2})
 
 	newOwner := app.NFTKeeper.GetOwner(ctx, address)
 	require.NotEqual(t, oldOwner.String(), newOwner.String())
@@ -105,7 +105,7 @@ func TestSetOwners(t *testing.T) {
 	require.Equal(t, owner2.String(), newOwner2.String())
 
 	// replace old owners for invariance sanity
-	app.NFTKeeper.SetOwners(ctx, []types.Owner{oldOwner, oldOwner2})
+	app.NFTKeeper.SetOwners(ctx, []types.NFTOwner{oldOwner, oldOwner2})
 
 	msg, fail := keeper.SupplyInvariant(app.NFTKeeper)(ctx)
 	require.False(t, fail, msg)

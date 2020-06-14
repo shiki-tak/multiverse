@@ -9,10 +9,10 @@ import (
 )
 
 // GetOwners returns all the Owners ID Collections
-func (k Keeper) GetOwners(ctx sdk.Context) (owners []types.Owner) {
+func (k Keeper) GetOwners(ctx sdk.Context) (owners []types.NFTOwner) {
 	var foundOwners = make(map[string]bool)
 	k.IterateOwners(ctx,
-		func(owner types.Owner) (stop bool) {
+		func(owner types.NFTOwner) (stop bool) {
 			if _, ok := foundOwners[owner.Address.String()]; !ok {
 				foundOwners[owner.Address.String()] = true
 				owners = append(owners, owner)
@@ -24,7 +24,7 @@ func (k Keeper) GetOwners(ctx sdk.Context) (owners []types.Owner) {
 }
 
 // GetOwner gets all the ID Collections owned by an address
-func (k Keeper) GetOwner(ctx sdk.Context, address sdk.AccAddress) (owner types.Owner) {
+func (k Keeper) GetOwner(ctx sdk.Context, address sdk.AccAddress) (owner types.NFTOwner) {
 	var idCollections []types.IDCollection
 	k.IterateIDCollections(ctx, types.GetOwnersKey(address),
 		func(_ sdk.AccAddress, idCollection types.IDCollection) (stop bool) {
@@ -58,21 +58,21 @@ func (k Keeper) SetOwnerByDenom(ctx sdk.Context, owner sdk.AccAddress, denom str
 	store.Set(key, k.cdc.MustMarshalBinaryLengthPrefixed(idCollection))
 }
 
-// SetOwner sets an entire Owner
-func (k Keeper) SetOwner(ctx sdk.Context, owner types.Owner) {
+// SetOwner sets an entire NFTOwner
+func (k Keeper) SetOwner(ctx sdk.Context, owner types.NFTOwner) {
 	for _, idCollection := range owner.IDCollections {
 		k.SetOwnerByDenom(ctx, owner.Address, idCollection.Denom, idCollection.IDs)
 	}
 }
 
 // SetOwners sets all Owners
-func (k Keeper) SetOwners(ctx sdk.Context, owners []types.Owner) {
+func (k Keeper) SetOwners(ctx sdk.Context, owners []types.NFTOwner) {
 	for _, owner := range owners {
 		k.SetOwner(ctx, owner)
 	}
 }
 
-// IterateIDCollections iterates over the IDCollections by Owner and performs a function
+// IterateIDCollections iterates over the IDCollections by NFTOwner and performs a function
 func (k Keeper) IterateIDCollections(ctx sdk.Context, prefix []byte,
 	handler func(owner sdk.AccAddress, idCollection types.IDCollection) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
@@ -90,12 +90,12 @@ func (k Keeper) IterateIDCollections(ctx sdk.Context, prefix []byte,
 }
 
 // IterateOwners iterates over all Owners and performs a function
-func (k Keeper) IterateOwners(ctx sdk.Context, handler func(owner types.Owner) (stop bool)) {
+func (k Keeper) IterateOwners(ctx sdk.Context, handler func(owner types.NFTOwner) (stop bool)) {
 	store := ctx.KVStore(k.storeKey)
 	iterator := sdk.KVStorePrefixIterator(store, types.OwnersKeyPrefix)
 	defer iterator.Close()
 	for ; iterator.Valid(); iterator.Next() {
-		var owner types.Owner
+		var owner types.NFTOwner
 
 		address, _ := types.SplitOwnerKey(iterator.Key())
 		owner = k.GetOwner(ctx, address)

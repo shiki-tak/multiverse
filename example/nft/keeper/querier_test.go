@@ -147,7 +147,7 @@ func TestQueryOwner(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, res)
 
-	var out types.Owner
+	var out types.NFTOwner
 	app.Codec().MustUnmarshalJSON(res, &out)
 
 	// build the owner using only the first denom
