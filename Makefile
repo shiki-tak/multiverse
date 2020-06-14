@@ -1,6 +1,5 @@
-#!/usr/bin/make -f
+.PHONY: build
 
 build:
-	go build -o build/simappd ./example/cmd/simappd
-	go build -o build/simappcli ./example/cmd/simappcli
-
+	go build -mod readonly -o build/simappd ./example/cmd/simappd
+	go build -mod readonly -o build/simappcli ./example/cmd/simappcli
