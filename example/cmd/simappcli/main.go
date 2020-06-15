@@ -51,7 +51,7 @@ func main() {
 	// with the cdc
 
 	rootCmd := &cobra.Command{
-		Use:   "connectcli",
+		Use:   "simappcli",
 		Short: "Command line interface for interacting with connectd",
 	}
 

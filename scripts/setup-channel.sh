@@ -26,3 +26,5 @@ ${RELAYER_CMD} lite init ibc0 -f
 ${RELAYER_CMD} lite init ibc1 -f
 
 ${RELAYER_CMD} tx link demo
+
+${RELAYER_CMD} start demo

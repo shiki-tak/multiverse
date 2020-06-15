@@ -47,11 +47,11 @@ import (
 const appName = "SimApp"
 
 var (
-	// DefaultCLIHome default home directories for connectcli
-	DefaultCLIHome = os.ExpandEnv("$HOME/.connectcli")
+	// DefaultCLIHome default home directories for simappcli
+	DefaultCLIHome = os.ExpandEnv("$HOME/.simappcli")
 
 	// DefaultNodeHome default home directories for connectd
-	DefaultNodeHome = os.ExpandEnv("$HOME/.connectd")
+	DefaultNodeHome = os.ExpandEnv("$HOME/.simappd")
 
 	// ModuleBasics defines the module BasicManager is in charge of setting up basic,
 	// non-dependant module elements, such as codec registration
