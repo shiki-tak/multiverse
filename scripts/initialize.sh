@@ -14,8 +14,7 @@ make build
 
 export RELAYER_CLI=${RELAYER_DIR}/relayer/build/rly
 
-cd ${PREV_DIR}
-
+cd ${PREV_DIR}/scripts
 ./cleanup.sh
 
 ./two-chainz

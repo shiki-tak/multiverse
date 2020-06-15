@@ -1,8 +1,8 @@
 package xnft
 
 import (
-	"github.com/shiki-tak/connect/x/x-nft/keeper"
-	"github.com/shiki-tak/connect/x/x-nft/types"
+	"github.com/shiki-tak/connect/x/xnft/keeper"
+	"github.com/shiki-tak/connect/x/xnft/types"
 )
 
 const (

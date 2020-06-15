@@ -8,7 +8,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
-	"github.com/shiki-tak/connect/x/x-nft/types"
+	"github.com/shiki-tak/connect/x/xnft/types"
 )
 
 // GetTxCmd returns the transaction commands for this module

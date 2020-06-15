@@ -8,7 +8,7 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/types/rest"
-	"github.com/shiki-tak/connect/x/x-nft/types"
+	"github.com/shiki-tak/connect/x/xnft/types"
 )
 
 func registerQueryRoutes(cliCtx context.CLIContext, r *mux.Router) {

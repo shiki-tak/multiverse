@@ -41,7 +41,7 @@ import (
 
 	"github.com/shiki-tak/connect/example/nft"
 
-	xnft "github.com/shiki-tak/connect/x/x-nft"
+	xnft "github.com/shiki-tak/connect/x/xnft"
 )
 
 const appName = "SimApp"

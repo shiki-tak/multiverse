@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/mux"
-	"github.com/shiki-tak/connect/x/x-nft/client/cli"
-	"github.com/shiki-tak/connect/x/x-nft/client/rest"
-	"github.com/shiki-tak/connect/x/x-nft/types"
+	"github.com/shiki-tak/connect/x/xnft/client/cli"
+	"github.com/shiki-tak/connect/x/xnft/client/rest"
+	"github.com/shiki-tak/connect/x/xnft/types"
 	"github.com/spf13/cobra"
 
 	abci "github.com/tendermint/tendermint/abci/types"

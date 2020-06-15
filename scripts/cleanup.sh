@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+echo "Cleanup env..."
+
 PROCESS_NAME=simappd
 
 rm -rf ./.relayer
