@@ -6,7 +6,16 @@ import (
 )
 
 const (
-	// TODO: define constants that you would like exposed from your module
+	DefaultPacketTimeoutHeight    = keeper.DefaultPacketTimeoutHeight
+	DefaultPacketTimeoutTimestamp = keeper.DefaultPacketTimeoutTimestamp
+	EventTypeTimeout              = types.EventTypeTimeout
+	EventTypePacket               = types.EventTypePacket
+	EventTypeChannelClose         = types.EventTypeChannelClose
+	AttributeKeyReceiver          = types.AttributeKeyReceiver
+	AttributeKeyRefundReceiver    = types.AttributeKeyRefundReceiver
+	AttributeKeyRefundValue       = types.AttributeKeyRefundValue
+	AttributeKeyAckSuccess        = types.AttributeKeyAckSuccess
+	AttributeKeyAckError          = types.AttributeKeyAckError
 
 	ModuleName        = types.ModuleName
 	RouterKey         = types.RouterKey
@@ -17,25 +26,28 @@ const (
 )
 
 var (
-	// functions aliases
 	NewKeeper           = keeper.NewKeeper
 	NewQuerier          = keeper.NewQuerier
 	RegisterCodec       = types.RegisterCodec
 	NewGenesisState     = types.NewGenesisState
 	DefaultGenesisState = types.DefaultGenesisState
 	ValidateGenesis     = types.ValidateGenesis
-	// TODO: Fill out function aliases
 
 	// variable aliases
-	ModuleCdc = types.ModuleCdc
-	// TODO: Fill out variable aliases
+	ModuleCdc              = types.ModuleCdc
+	AttributeValueCategory = types.AttributeValueCategory
 )
 
 type (
-	Keeper       = keeper.Keeper
-	GenesisState = types.GenesisState
-	// Params       = types.Params
+	Keeper           = keeper.Keeper
+	ChannelKeeper    = types.ChannelKeeper
+	ClientKeeper     = types.ClientKeeper
+	ConnectionKeeper = types.ConnectionKeeper
+	NFTKeeper        = types.NFTKeeper
 
-	// TODO: Fill out module types
-	MsgTransfer = types.MsgTransfer
+	GenesisState = types.GenesisState
+
+	NonFungibleTokenPacketData            = types.NonFungibleTokenPacketData
+	NonFungibleTokenPacketAcknowledgement = types.NonFungibleTokenPacketAcknowledgement
+	MsgTransfer                           = types.MsgTransfer
 )

@@ -19,3 +19,5 @@ func (n QueryResList) String() string {
 }
 
 */
+
+type QueryUnacknowledgedPacketsRequest struct{}

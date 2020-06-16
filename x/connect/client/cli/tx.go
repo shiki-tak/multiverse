@@ -39,7 +39,7 @@ func GetNFTTransferTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "nft-transfer [src-port] [src-channel] [dest-height] [receiver] [denom] [token_id]",
 		Short: "Transfer non-fungible token through IBC.",
-		Args:  cobra.ExactArgs(5),
+		Args:  cobra.ExactArgs(6),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			inBuf := bufio.NewReader(cmd.InOrStdin())
 			txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))

@@ -1,15 +1,24 @@
 package types
 
-// ibc module event types
+import (
+	"fmt"
+
+	ibctypes "github.com/cosmos/cosmos-sdk/x/ibc/types"
+)
+
 const (
-	// TODO: Create your event types
-	// EventType<Action>    		= "action"
+	EventTypeTimeout      = "timeout"
+	EventTypePacket       = "non_fungible_token_packet"
+	EventTypeChannelClose = "channel_closed"
 
-	// TODO: Create keys fo your events, the values will be derivided from the msg
-	// AttributeKeyAddress  		= "address"
+	AttributeKeyReceiver       = "receiver"
+	AttributeKeyRefundReceiver = "refund_receiver"
+	AttributeKeyRefundValue    = "refund_value"
+	AttributeKeyAckSuccess     = "success"
+	AttributeKeyAckError       = "error"
+)
 
-	// TODO: Some events may not have values for that reason you want to emit that something happened.
-	// AttributeValueDoubleSign = "double_sign"
-
-	AttributeValueCategory = ModuleName
+// IBC transfer events vars
+var (
+	AttributeValueCategory = fmt.Sprintf("%s_%s", ibctypes.ModuleName, ModuleName)
 )

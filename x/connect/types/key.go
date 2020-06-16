@@ -3,20 +3,20 @@ package types
 import "fmt"
 
 const (
-	// ModuleName is the name of the module
 	ModuleName = "connect"
 
-	// StoreKey to be used when creating the KVStore
+	Version = "ics20-1"
+
+	PortID = "connect"
+
 	StoreKey = ModuleName
 
-	// RouterKey to be used for routing msgs
 	RouterKey = ModuleName
 
-	// QuerierRoute to be used for querierer msgs
-	QuerierRoute = ModuleName
-)
+	PortKey = "portID"
 
-const (
+	QuerierRoute = ModuleName
+
 	TypeTransfer = "transfer"
 )
 

@@ -2,14 +2,23 @@ package connect
 
 import (
 	"encoding/json"
+	"fmt"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/gorilla/mux"
 	"github.com/shiki-tak/connect/x/connect/client/cli"
 	"github.com/shiki-tak/connect/x/connect/client/rest"
 	"github.com/shiki-tak/connect/x/connect/types"
 	"github.com/spf13/cobra"
 
+	"github.com/cosmos/cosmos-sdk/x/capability"
+	channel "github.com/cosmos/cosmos-sdk/x/ibc/04-channel"
+	channeltypes "github.com/cosmos/cosmos-sdk/x/ibc/04-channel/types"
 	abci "github.com/tendermint/tendermint/abci/types"
+
+	port "github.com/cosmos/cosmos-sdk/x/ibc/05-port"
+	porttypes "github.com/cosmos/cosmos-sdk/x/ibc/05-port/types"
+	ibctypes "github.com/cosmos/cosmos-sdk/x/ibc/types"
 
 	"github.com/cosmos/cosmos-sdk/client/context"
 	"github.com/cosmos/cosmos-sdk/codec"
@@ -19,7 +28,9 @@ import (
 
 // Type check to ensure the interface is properly implemented
 var (
-	_ module.AppModule      = AppModule{}
+	_ module.AppModule = AppModule{}
+	_ port.IBCModule   = AppModule{}
+
 	_ module.AppModuleBasic = AppModuleBasic{}
 )
 
@@ -78,7 +89,7 @@ type AppModule struct {
 }
 
 // NewAppModule creates a new AppModule object
-func NewAppModule(k Keeper /*TODO: Add Keepers that your application depends on*/) AppModule {
+func NewAppModule(k Keeper) AppModule {
 	return AppModule{
 		AppModuleBasic: AppModuleBasic{},
 		keeper:         k,
@@ -139,4 +150,211 @@ func (am AppModule) BeginBlock(ctx sdk.Context, req abci.RequestBeginBlock) {
 // updates.
 func (AppModule) EndBlock(_ sdk.Context, _ abci.RequestEndBlock) []abci.ValidatorUpdate {
 	return []abci.ValidatorUpdate{}
+}
+
+//____________________________________________________________________________
+// Implement for IBC
+
+// Implement IBCModule callbacks
+func (am AppModule) OnChanOpenInit(
+	ctx sdk.Context,
+	order ibctypes.Order,
+	connectionHops []string,
+	portID string,
+	channelID string,
+	chanCap *capability.Capability,
+	counterparty channeltypes.Counterparty,
+	version string,
+) error {
+	if counterparty.PortID != types.PortID {
+		return sdkerrors.Wrapf(porttypes.ErrInvalidPort, "counterparty has invalid portid. expected: %s, got %s", types.PortID, counterparty.PortID)
+	}
+
+	if version != types.Version {
+		return sdkerrors.Wrapf(porttypes.ErrInvalidPort, "invalid version: %s, expected %s", version, types.Version)
+	}
+
+	// Claim channel capability passed back by IBC module
+	if err := am.keeper.ClaimCapability(ctx, chanCap, ibctypes.ChannelCapabilityPath(portID, channelID)); err != nil {
+		return sdkerrors.Wrap(channel.ErrChannelCapabilityNotFound, err.Error())
+	}
+
+	return nil
+}
+
+func (am AppModule) OnChanOpenTry(
+	ctx sdk.Context,
+	order ibctypes.Order,
+	connectionHops []string,
+	portID,
+	channelID string,
+	chanCap *capability.Capability,
+	counterparty channeltypes.Counterparty,
+	version,
+	counterpartyVersion string,
+) error {
+	// TODO: Enforce ordering, currently relayers use ORDERED channels
+
+	if counterparty.PortID != types.PortID {
+		return sdkerrors.Wrapf(porttypes.ErrInvalidPort, "counterparty has invalid portid. expected: %s, got %s", types.PortID, counterparty.PortID)
+	}
+
+	if version != types.Version {
+		return sdkerrors.Wrapf(porttypes.ErrInvalidPort, "invalid version: %s, expected %s", version, types.Version)
+	}
+
+	if counterpartyVersion != types.Version {
+		return sdkerrors.Wrapf(porttypes.ErrInvalidPort, "invalid counterparty version: %s, expected %s", counterpartyVersion, types.Version)
+	}
+
+	// Claim channel capability passed back by IBC module
+	if err := am.keeper.ClaimCapability(ctx, chanCap, ibctypes.ChannelCapabilityPath(portID, channelID)); err != nil {
+		return sdkerrors.Wrap(channel.ErrChannelCapabilityNotFound, err.Error())
+	}
+
+	// TODO: escrow
+	return nil
+}
+
+func (am AppModule) OnChanOpenAck(
+	ctx sdk.Context,
+	portID,
+	channelID string,
+	counterpartyVersion string,
+) error {
+	if counterpartyVersion != types.Version {
+		return sdkerrors.Wrapf(porttypes.ErrInvalidPort, "invalid counterparty version: %s, expected %s", counterpartyVersion, types.Version)
+	}
+	return nil
+}
+
+func (am AppModule) OnChanOpenConfirm(
+	ctx sdk.Context,
+	portID,
+	channelID string,
+) error {
+	return nil
+}
+
+func (am AppModule) OnChanCloseInit(
+	ctx sdk.Context,
+	portID,
+	channelID string,
+) error {
+	// Disallow user-initiated channel closing for transfer channels
+	return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "user cannot close channel")
+}
+
+func (am AppModule) OnChanCloseConfirm(
+	ctx sdk.Context,
+	portID,
+	channelID string,
+) error {
+	return nil
+}
+
+func (am AppModule) OnRecvPacket(
+	ctx sdk.Context,
+	packet channeltypes.Packet,
+) (*sdk.Result, error) {
+	var data NonFungibleTokenPacketData
+	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal nft transfer packet data: %s", err.Error())
+	}
+	acknowledgement := NonFungibleTokenPacketAcknowledgement{
+		Success: true,
+		Error:   "",
+	}
+	if err := am.keeper.OnRecvPacket(ctx, packet, data); err != nil {
+		acknowledgement = NonFungibleTokenPacketAcknowledgement{
+			Success: false,
+			Error:   err.Error(),
+		}
+	}
+
+	if err := am.keeper.PacketExecuted(ctx, packet, acknowledgement.GetBytes()); err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			EventTypePacket,
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
+			sdk.NewAttribute(AttributeKeyReceiver, data.Receiver.String()),
+			// TODO: implement
+		),
+	)
+
+	return &sdk.Result{
+		Events: ctx.EventManager().Events().ToABCIEvents(),
+	}, nil
+}
+
+func (am AppModule) OnAcknowledgementPacket(
+	ctx sdk.Context,
+	packet channeltypes.Packet,
+	acknowledgement []byte,
+) (*sdk.Result, error) {
+	var ack NonFungibleTokenPacketAcknowledgement
+	if err := types.ModuleCdc.UnmarshalJSON(acknowledgement, &ack); err != nil {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal nft transfer packet acknowledgement: %v", err)
+	}
+	var data NonFungibleTokenPacketData
+	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal nft transfer packet data: %s", err.Error())
+	}
+
+	if err := am.keeper.OnAcknowledgementPacket(ctx, packet, data, ack); err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(
+		// TODO: implement
+		sdk.NewEvent(
+			EventTypePacket,
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
+			sdk.NewAttribute(AttributeKeyReceiver, data.Receiver.String()),
+			sdk.NewAttribute(AttributeKeyAckSuccess, fmt.Sprintf("%t", ack.Success)),
+		),
+	)
+
+	if !ack.Success {
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				EventTypePacket,
+				sdk.NewAttribute(AttributeKeyAckError, ack.Error),
+			),
+		)
+	}
+
+	return &sdk.Result{
+		Events: ctx.EventManager().Events().ToABCIEvents(),
+	}, nil
+}
+
+func (am AppModule) OnTimeoutPacket(
+	ctx sdk.Context,
+	packet channeltypes.Packet,
+) (*sdk.Result, error) {
+	var data NonFungibleTokenPacketData
+	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal nft transfer packet data: %s", err.Error())
+	}
+	// refund tokens
+	if err := am.keeper.OnTimeoutPacket(ctx, packet, data); err != nil {
+		return nil, err
+	}
+
+	ctx.EventManager().EmitEvent(
+		// TODO: implement
+		sdk.NewEvent(
+			EventTypeTimeout,
+			sdk.NewAttribute(AttributeKeyRefundReceiver, data.Sender.String()),
+			sdk.NewAttribute(sdk.AttributeKeyModule, AttributeValueCategory),
+		),
+	)
+
+	return &sdk.Result{
+		Events: ctx.EventManager().Events().ToABCIEvents(),
+	}, nil
 }

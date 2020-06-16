@@ -138,6 +138,7 @@ type SimApp struct {
 	// make scoped keepers public for test purposes
 	scopedIBCKeeper      capability.ScopedKeeper
 	scopedTransferKeeper capability.ScopedKeeper
+	scopedConnectKeeper  capability.ScopedKeeper
 
 	// the module manager
 	mm *module.Manager
@@ -153,7 +154,6 @@ func NewSimApp(
 	baseAppOptions ...func(*baseapp.BaseApp),
 ) *SimApp {
 
-	// TODO: Remove cdc in favor of appCodec once all modules are migrated.
 	appCodec, cdc := MakeCodecs()
 
 	bApp := baseapp.NewBaseApp(appName, logger, db, auth.DefaultTxDecoder(cdc), baseAppOptions...)
@@ -198,7 +198,7 @@ func NewSimApp(
 	app.capabilityKeeper = capability.NewKeeper(appCodec, keys[capability.StoreKey], memKeys[capability.MemStoreKey])
 	scopedIBCKeeper := app.capabilityKeeper.ScopeToModule(ibc.ModuleName)
 	scopedTransferKeeper := app.capabilityKeeper.ScopeToModule(transfer.ModuleName)
-	scopedNFTTransferKeeper := app.capabilityKeeper.ScopeToModule(connect.ModuleName)
+	scopedConnectKeeper := app.capabilityKeeper.ScopeToModule(connect.ModuleName)
 
 	// add keepers
 	app.accountKeeper = auth.NewAccountKeeper(
@@ -227,9 +227,6 @@ func NewSimApp(
 	app.upgradeKeeper = upgrade.NewKeeper(skipUpgradeHeights, keys[upgrade.StoreKey], appCodec, home)
 
 	app.NFTKeeper = nft.NewKeeper(app.cdc, keys[nft.StoreKey])
-
-	app.connectKeeper = connect.NewKeeper(app.cdc, keys[connect.StoreKey], app.NFTKeeper,
-		app.ibcKeeper.ChannelKeeper, &app.ibcKeeper.PortKeeper, scopedNFTTransferKeeper)
 
 	// register the proposal types
 	govRouter := gov.NewRouter()
@@ -267,6 +264,13 @@ func NewSimApp(
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := port.NewRouter()
 	ibcRouter.AddRoute(transfer.ModuleName, transferModule)
+
+	app.connectKeeper = connect.NewKeeper(app.cdc, keys[connect.StoreKey], app.NFTKeeper,
+		app.ibcKeeper.ChannelKeeper, &app.ibcKeeper.PortKeeper, scopedConnectKeeper)
+
+	connectModule := connect.NewAppModule(app.connectKeeper)
+	ibcRouter.AddRoute(connect.ModuleName, connectModule)
+
 	app.ibcKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router
@@ -297,8 +301,8 @@ func NewSimApp(
 		ibc.NewAppModule(app.ibcKeeper),
 		params.NewAppModule(app.paramsKeeper),
 		transferModule,
+		connectModule,
 		nft.NewAppModule(app.NFTKeeper, app.accountKeeper),
-		connect.NewAppModule(app.connectKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -376,6 +380,7 @@ func NewSimApp(
 
 	app.scopedIBCKeeper = scopedIBCKeeper
 	app.scopedTransferKeeper = scopedTransferKeeper
+	app.scopedConnectKeeper = scopedConnectKeeper
 
 	return app
 }
