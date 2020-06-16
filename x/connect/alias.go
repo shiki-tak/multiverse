@@ -51,8 +51,4 @@ type (
 	NonFungibleTokenPacketData            = types.NonFungibleTokenPacketData
 	NonFungibleTokenPacketAcknowledgement = types.NonFungibleTokenPacketAcknowledgement
 	MsgTransfer                           = types.MsgTransfer
-
-	UnacknowledgedPacket               = types.UnacknowledgedPacket
-	QueryUnacknowledgedPacketsRequest  = types.QueryUnacknowledgedPacketsRequest
-	QueryUnacknowledgedPacketsResponse = types.QueryUnacknowledgedPacketsResponse
 )
