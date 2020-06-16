@@ -1,23 +1,35 @@
 package types
 
-// Query endpoints supported by the ibc querier
-const (
-// TODO: Describe query parameters, update <action> with your query
-// Query<Action>    = "<action>"
+import (
+	"errors"
+	"strconv"
+	"strings"
 )
 
-/*
-Below you will be able how to set your own queries:
+type QueryUnacknowledgedPacketsRequest struct{}
 
-
-// QueryResList Queries Result Payload for a query
-type QueryResList []string
-
-// implement fmt.Stringer
-func (n QueryResList) String() string {
-	return strings.Join(n[:], "\n")
+type QueryUnacknowledgedPacketsResponse struct {
+	Packets []UnacknowledgedPacket `json:"packets" yaml:"packets"`
 }
 
-*/
+type UnacknowledgedPacket struct {
+	Sequence      uint64 `json:"sequence" yaml:"sequence"`             // number corresponds to the order of sends and receives, where a Packet with an earlier sequence number must be sent and received before a Packet with a later sequence number.
+	SourcePort    string `json:"source_port" yaml:"source_port"`       // identifies the port on the sending chain.
+	SourceChannel string `json:"source_channel" yaml:"source_channel"` // identifies the channel end on the sending chain.
+}
 
-type QueryUnacknowledgedPacketsRequest struct{}
+func ParseUnacknowledgedPacketKey(key []byte) (*UnacknowledgedPacket, error) {
+	parts := strings.Split(string(key), "/")
+	if len(parts) != 3 {
+		return nil, errors.New("length of parts must be 3")
+	}
+	seq, err := strconv.Atoi(parts[2])
+	if err != nil {
+		return nil, err
+	}
+	return &UnacknowledgedPacket{
+		Sequence:      uint64(seq),
+		SourcePort:    string(parts[0]),
+		SourceChannel: string(parts[1]),
+	}, nil
+}

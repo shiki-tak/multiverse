@@ -32,6 +32,7 @@ var (
 	NewGenesisState     = types.NewGenesisState
 	DefaultGenesisState = types.DefaultGenesisState
 	ValidateGenesis     = types.ValidateGenesis
+	NewMsgTransfer      = types.NewMsgTransfer
 
 	// variable aliases
 	ModuleCdc              = types.ModuleCdc

@@ -5,7 +5,7 @@ import "fmt"
 const (
 	ModuleName = "connect"
 
-	Version = "ics20-1"
+	Version = "connect-1"
 
 	PortID = "connect"
 
