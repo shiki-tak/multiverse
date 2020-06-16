@@ -28,16 +28,16 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	connectTxCmd.AddCommand(flags.PostCommands(
-		GetTransferTxCmd(cdc),
+		GetNFTTransferTxCmd(cdc),
 	)...)
 
 	return connectTxCmd
 }
 
 // GetTransferTxCmd returns the command to create a NewMsgTransfer transaction
-func GetTransferTxCmd(cdc *codec.Codec) *cobra.Command {
+func GetNFTTransferTxCmd(cdc *codec.Codec) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "transfer [src-port] [src-channel] [dest-height] [receiver] [denom] [token_id]",
+		Use:   "nft-transfer [src-port] [src-channel] [dest-height] [receiver] [denom] [token_id]",
 		Short: "Transfer non-fungible token through IBC.",
 		Args:  cobra.ExactArgs(5),
 		RunE: func(cmd *cobra.Command, args []string) error {
