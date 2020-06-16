@@ -39,9 +39,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
 
-	"github.com/shiki-tak/connect/example/nft"
+	"github.com/shiki-tak/connect/x/nft"
 
-	xnft "github.com/shiki-tak/connect/x/xnft"
+	connect "github.com/shiki-tak/connect/x/connect"
 )
 
 const appName = "SimApp"
@@ -77,7 +77,7 @@ var (
 
 		nft.AppModuleBasic{},
 
-		xnft.AppModuleBasic{},
+		connect.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -133,7 +133,7 @@ type SimApp struct {
 
 	NFTKeeper nft.Keeper
 
-	xnftKeeper xnft.Keeper
+	connectKeeper connect.Keeper
 
 	// make scoped keepers public for test purposes
 	scopedIBCKeeper      capability.ScopedKeeper
@@ -165,7 +165,7 @@ func NewSimApp(
 		mint.StoreKey, distr.StoreKey, slashing.StoreKey,
 		gov.StoreKey, params.StoreKey, ibc.StoreKey, upgrade.StoreKey,
 		evidence.StoreKey, transfer.StoreKey, capability.StoreKey,
-		nft.StoreKey, xnft.StoreKey,
+		nft.StoreKey, connect.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(params.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capability.MemStoreKey)
@@ -198,6 +198,7 @@ func NewSimApp(
 	app.capabilityKeeper = capability.NewKeeper(appCodec, keys[capability.StoreKey], memKeys[capability.MemStoreKey])
 	scopedIBCKeeper := app.capabilityKeeper.ScopeToModule(ibc.ModuleName)
 	scopedTransferKeeper := app.capabilityKeeper.ScopeToModule(transfer.ModuleName)
+	scopedNFTTransferKeeper := app.capabilityKeeper.ScopeToModule(connect.ModuleName)
 
 	// add keepers
 	app.accountKeeper = auth.NewAccountKeeper(
@@ -227,7 +228,8 @@ func NewSimApp(
 
 	app.NFTKeeper = nft.NewKeeper(app.cdc, keys[nft.StoreKey])
 
-	app.xnftKeeper = xnft.NewKeeper(app.cdc, keys[xnft.StoreKey])
+	app.connectKeeper = connect.NewKeeper(app.cdc, keys[connect.StoreKey], app.NFTKeeper,
+		app.ibcKeeper.ChannelKeeper, &app.ibcKeeper.PortKeeper, scopedNFTTransferKeeper)
 
 	// register the proposal types
 	govRouter := gov.NewRouter()
@@ -296,7 +298,7 @@ func NewSimApp(
 		params.NewAppModule(app.paramsKeeper),
 		transferModule,
 		nft.NewAppModule(app.NFTKeeper, app.accountKeeper),
-		xnft.NewAppModule(app.xnftKeeper),
+		connect.NewAppModule(app.connectKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -317,7 +319,7 @@ func NewSimApp(
 		capability.ModuleName, auth.ModuleName, distr.ModuleName, staking.ModuleName, bank.ModuleName,
 		slashing.ModuleName, gov.ModuleName, mint.ModuleName, crisis.ModuleName,
 		ibc.ModuleName, genutil.ModuleName, evidence.ModuleName, transfer.ModuleName, nft.ModuleName,
-		xnft.ModuleName,
+		connect.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
