@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+const (
+	QueryUnacknowledgedPackets = "unacknowledged_packets"
+)
+
 type QueryUnacknowledgedPacketsRequest struct{}
 
 type QueryUnacknowledgedPacketsResponse struct {
