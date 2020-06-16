@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 const (
 	// ModuleName is the name of the module
 	ModuleName = "connect"
@@ -17,3 +19,7 @@ const (
 const (
 	TypeTransfer = "transfer"
 )
+
+func GenerateKey(prefix, tokenID string) string {
+	return fmt.Sprintf("%s%s", prefix, tokenID)
+}

@@ -61,7 +61,7 @@ func GetTransferTxCmd(cdc *codec.Codec) *cobra.Command {
 			denom := args[4]
 			tokenID := args[5]
 
-			msg := types.NewMsgTransfer(srcPort, srcChannel, destHeight, receiver, sender, denom, tokenID)
+			msg := types.NewMsgTransfer(srcPort, srcChannel, uint64(destHeight), receiver, sender, denom, tokenID)
 			if err := msg.ValidateBasic(); err != nil {
 				return err
 			}

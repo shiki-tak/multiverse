@@ -12,9 +12,6 @@ func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
-		// TODO: Define your msg cases
-		//
-		//Example:
 		case MsgTransfer:
 			return handleMsgTransfer(ctx, k, msg)
 		default:
@@ -24,14 +21,13 @@ func NewHandler(k Keeper) sdk.Handler {
 	}
 }
 
-// handle<Action> does x
 func handleMsgTransfer(ctx sdk.Context, k Keeper, msg MsgTransfer) (*sdk.Result, error) {
 	nft, err := k.NFTKeeper.GetNFT(ctx, msg.Denom, msg.TokenID)
 	if err != nil {
 		return nil, err
 	}
 
-	err = k.SendTransfer(ctx, msg.SrcPort, msg.SrcChannel, msg.DestHeight, msg.Receiver, msg.Sender, nft)
+	err = k.SendTransfer(ctx, msg.SrcPort, msg.SrcChannel, msg.DestHeight, msg.Receiver, msg.Sender, msg.Denom, nft)
 	if err != nil {
 		return nil, err
 	}

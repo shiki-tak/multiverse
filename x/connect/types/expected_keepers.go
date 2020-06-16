@@ -22,6 +22,8 @@ type ParamSubspace interface {
 // NFTKeeper defines the expected IBC nft keeper
 type NFTKeeper interface {
 	GetNFT(ctx sdk.Context, denom, id string) (nftexported.NFT, error)
+	MintNFT(ctx sdk.Context, denom string, nft nftexported.NFT) error
+	DeleteNFT(ctx sdk.Context, denom, id string) error
 }
 
 // ChannelKeeper defines the expected IBC channel keeper

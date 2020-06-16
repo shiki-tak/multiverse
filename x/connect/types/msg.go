@@ -7,7 +7,7 @@ import (
 type MsgTransfer struct {
 	SrcPort    string         `json:"src_port"`
 	SrcChannel string         `json:"src_channel"`
-	DestHeight int            `json:"dest_height"`
+	DestHeight uint64         `json:"dest_height"`
 	Receiver   sdk.AccAddress `json:"receiver"`
 	Sender     sdk.AccAddress `json:"sender"`
 	Denom      string         `json:"denom"`
@@ -16,7 +16,7 @@ type MsgTransfer struct {
 
 // [src-port] [src-channel] [dest-height] [receiver] [token_id]
 
-func NewMsgTransfer(srcPort string, srcChannel string, destHeight int, receiver sdk.AccAddress, sender sdk.AccAddress, denom, tokenID string) MsgTransfer {
+func NewMsgTransfer(srcPort string, srcChannel string, destHeight uint64, receiver sdk.AccAddress, sender sdk.AccAddress, denom, tokenID string) MsgTransfer {
 	return MsgTransfer{
 		SrcPort:    srcPort,
 		SrcChannel: srcChannel,
