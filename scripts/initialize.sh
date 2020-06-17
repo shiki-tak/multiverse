@@ -7,8 +7,9 @@ RELAYER_DIR=$(mktemp -d)
 echo "RELAYER_DIR is ${RELAYER_DIR}"
 
 cd ${RELAYER_DIR}
-git clone https://github.com/iqlusioninc/relayer
+git clone https://github.com/shiki-tak/relayer
 cd ./relayer
+git checkout connect
 echo "Building Relayer..."
 make build
 

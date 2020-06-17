@@ -2,14 +2,15 @@ package types
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	nftexported "github.com/shiki-tak/connect/x/nft/exported"
 )
 
 type NonFungibleTokenPacketData struct {
-	Denom    string          `json:"denom"`
-	NFT      nftexported.NFT `json:"nft"`
-	Sender   sdk.AccAddress  `json:"sender"`
-	Receiver sdk.AccAddress  `json:"receiver"`
+	Denom    string `json:"denom"`
+	ID       string `json:"id"`
+	TokenURI string `json:"token_uri"`
+	// NFT      nftexported.NFT `json:"nft"`	// TODO:
+	Sender   sdk.AccAddress `json:"sender"`
+	Receiver sdk.AccAddress `json:"receiver"`
 }
 
 type NonFungibleTokenPacketAcknowledgement struct {
@@ -17,16 +18,19 @@ type NonFungibleTokenPacketAcknowledgement struct {
 	Error   string `json:"error"`
 }
 
-func NewNonFungibleTokenPacketData(denom string, nft nftexported.NFT, sender, receiver sdk.AccAddress) NonFungibleTokenPacketData {
+func NewNonFungibleTokenPacketData(denom, id, tokenURI string, sender, receiver sdk.AccAddress) NonFungibleTokenPacketData {
 	return NonFungibleTokenPacketData{
-		NFT:      nft,
+		Denom:    denom,
+		ID:       id,
+		TokenURI: tokenURI,
+		// NFT:      nft,
 		Sender:   sender,
 		Receiver: receiver,
 	}
 }
 
-func (ftpd NonFungibleTokenPacketData) GetBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(ftpd))
+func (nftpd NonFungibleTokenPacketData) GetBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(nftpd))
 }
 
 // GetBytes is a helper for serialising

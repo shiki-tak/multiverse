@@ -17,7 +17,7 @@ const (
 
 	QuerierRoute = ModuleName
 
-	TypeTransfer = "transfer"
+	TypeTransfer = "connect_transfer"
 )
 
 func GenerateKey(prefix, tokenID string) string {

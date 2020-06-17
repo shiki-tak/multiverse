@@ -91,7 +91,7 @@ type (
 	NFTJSON               = types.NFTJSON
 	IDCollection          = types.IDCollection
 	IDCollections         = types.IDCollections
-	NFTOwner                 = types.NFTOwner
+	NFTOwner              = types.NFTOwner
 	QueryCollectionParams = types.QueryCollectionParams
 	QueryBalanceParams    = types.QueryBalanceParams
 	QueryNFTParams        = types.QueryNFTParams

@@ -28,7 +28,7 @@ const (
 // Keeper of the ibc store
 type Keeper struct {
 	storeKey      sdk.StoreKey
-	cdc           *codec.Codec
+	cdc           codec.Marshaler
 	NFTKeeper     types.NFTKeeper
 	ChannelKeeper types.ChannelKeeper
 	PortKeeper    types.PortKeeper
@@ -36,7 +36,7 @@ type Keeper struct {
 }
 
 // NewKeeper creates a ibc keeper
-func NewKeeper(cdc *codec.Codec, key sdk.StoreKey,
+func NewKeeper(cdc codec.Marshaler, key sdk.StoreKey,
 	nftKeeper types.NFTKeeper,
 	channelKeeper types.ChannelKeeper, portKeeper types.PortKeeper, scopedKeeper capability.ScopedKeeper) Keeper {
 	keeper := Keeper{
@@ -98,7 +98,7 @@ func (k Keeper) createOutgoingPacket(
 	}
 
 	packetData := types.NewNonFungibleTokenPacketData(
-		denom, nft, sender, receiver,
+		denom, nft.GetID(), nft.GetTokenURI(), sender, receiver,
 	)
 
 	packet := channeltypes.NewPacket(
@@ -116,22 +116,28 @@ func (k Keeper) createOutgoingPacket(
 }
 
 func (k Keeper) OnRecvPacket(ctx sdk.Context, packet channeltypes.Packet, data types.NonFungibleTokenPacketData) error {
-	prefix := ibc20transfertypes.GetDenomPrefix(packet.GetSourcePort(), packet.GetSourceChannel())
-	sourceForID := strings.HasPrefix(data.NFT.GetID(), prefix)
-	sourceForDenom := strings.HasPrefix(data.Denom, prefix)
+	destPrefix := ibc20transfertypes.GetDenomPrefix(packet.GetDestPort(), packet.GetDestChannel())
+	srcPrefix := ibc20transfertypes.GetDenomPrefix(packet.GetSourcePort(), packet.GetSourceChannel())
+
+	destForID := strings.HasPrefix(data.ID, destPrefix)
+	destForDenom := strings.HasPrefix(data.Denom, destPrefix)
+
+	srcForID := strings.HasPrefix(data.ID, srcPrefix)
+	srcForDenom := strings.HasPrefix(data.Denom, srcPrefix)
 
 	var nft nfttypes.BaseNFT
 	denom := data.Denom
 
-	if sourceForID && sourceForDenom {
-		tokenID := data.NFT.GetID()[len(prefix):]
-		denom = data.Denom[len(prefix):]
+	if srcForID && srcForDenom {
+		tokenID := data.ID[len(destPrefix)+1:]
+		denom = data.Denom[len(destPrefix)+1:]
 
-		nft = nfttypes.NewBaseNFT(tokenID, data.Receiver, data.NFT.GetTokenURI())
+		nft = nfttypes.NewBaseNFT(tokenID, data.Receiver, data.TokenURI)
 	} else {
-		tokenID := types.GenerateKey(prefix, data.NFT.GetID())
+		tokenID := types.GenerateKey(destPrefix, data.ID)
+		denom = types.GenerateKey(destPrefix, data.Denom)
 
-		nft = nfttypes.NewBaseNFT(tokenID, data.Receiver, data.NFT.GetTokenURI())
+		nft = nfttypes.NewBaseNFT(tokenID, data.Receiver, data.TokenURI)
 	}
 
 	err := k.NFTKeeper.MintNFT(ctx, denom, &nft)

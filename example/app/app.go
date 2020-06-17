@@ -265,7 +265,7 @@ func NewSimApp(
 	ibcRouter := port.NewRouter()
 	ibcRouter.AddRoute(transfer.ModuleName, transferModule)
 
-	app.connectKeeper = connect.NewKeeper(app.cdc, keys[connect.StoreKey], app.NFTKeeper,
+	app.connectKeeper = connect.NewKeeper(appCodec, keys[connect.StoreKey], app.NFTKeeper,
 		app.ibcKeeper.ChannelKeeper, &app.ibcKeeper.PortKeeper, scopedConnectKeeper)
 
 	connectModule := connect.NewAppModule(app.connectKeeper)

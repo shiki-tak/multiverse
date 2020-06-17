@@ -6,15 +6,12 @@ import (
 
 // RegisterCodec registers concrete types on codec
 func RegisterCodec(cdc *codec.Codec) {
-	cdc.RegisterConcrete(MsgTransfer{}, "connect/transfer/MsgTransfer", nil)
+	cdc.RegisterConcrete(MsgTransfer{}, "connect/MsgTransfer", nil)
+	cdc.RegisterConcrete(NonFungibleTokenPacketData{}, "connect/NonFungibleTokenPacketData", nil)
 }
 
-// ModuleCdc defines the module codec
-var ModuleCdc *codec.Codec
+var ModuleCdc = codec.New()
 
 func init() {
-	ModuleCdc = codec.New()
 	RegisterCodec(ModuleCdc)
-	codec.RegisterCrypto(ModuleCdc)
-	ModuleCdc.Seal()
 }
