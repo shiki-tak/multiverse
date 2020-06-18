@@ -42,6 +42,8 @@ import (
 	"github.com/shiki-tak/connect/x/nft"
 
 	connect "github.com/shiki-tak/connect/x/connect"
+
+	relayer "github.com/shiki-tak/connect/x/relayer"
 )
 
 const appName = "SimApp"
@@ -78,6 +80,8 @@ var (
 		nft.AppModuleBasic{},
 
 		connect.AppModuleBasic{},
+
+		relayer.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -135,10 +139,13 @@ type SimApp struct {
 
 	connectKeeper connect.Keeper
 
+	relayerKeeper relayer.Keeper
+
 	// make scoped keepers public for test purposes
 	scopedIBCKeeper      capability.ScopedKeeper
 	scopedTransferKeeper capability.ScopedKeeper
 	scopedConnectKeeper  capability.ScopedKeeper
+	scopedRelayerKeeper  capability.ScopedKeeper
 
 	// the module manager
 	mm *module.Manager
@@ -165,7 +172,7 @@ func NewSimApp(
 		mint.StoreKey, distr.StoreKey, slashing.StoreKey,
 		gov.StoreKey, params.StoreKey, ibc.StoreKey, upgrade.StoreKey,
 		evidence.StoreKey, transfer.StoreKey, capability.StoreKey,
-		nft.StoreKey, connect.StoreKey,
+		nft.StoreKey, connect.StoreKey, relayer.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(params.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capability.MemStoreKey)
@@ -199,6 +206,7 @@ func NewSimApp(
 	scopedIBCKeeper := app.capabilityKeeper.ScopeToModule(ibc.ModuleName)
 	scopedTransferKeeper := app.capabilityKeeper.ScopeToModule(transfer.ModuleName)
 	scopedConnectKeeper := app.capabilityKeeper.ScopeToModule(connect.ModuleName)
+	scopedRelayerKeeper := app.capabilityKeeper.ScopeToModule(relayer.ModuleName)
 
 	// add keepers
 	app.accountKeeper = auth.NewAccountKeeper(
@@ -271,6 +279,12 @@ func NewSimApp(
 	connectModule := connect.NewAppModule(app.connectKeeper)
 	ibcRouter.AddRoute(connect.ModuleName, connectModule)
 
+	app.relayerKeeper = relayer.NewKeeper(appCodec, keys[relayer.StoreKey], app.NFTKeeper,
+		app.ibcKeeper.ChannelKeeper, &app.ibcKeeper.PortKeeper, scopedRelayerKeeper)
+
+	relayerModule := relayer.NewAppModule(app.relayerKeeper)
+	ibcRouter.AddRoute(relayer.ModuleName, relayerModule)
+
 	app.ibcKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router
@@ -302,6 +316,7 @@ func NewSimApp(
 		params.NewAppModule(app.paramsKeeper),
 		transferModule,
 		connectModule,
+		relayerModule,
 		nft.NewAppModule(app.NFTKeeper, app.accountKeeper),
 	)
 
@@ -323,7 +338,7 @@ func NewSimApp(
 		capability.ModuleName, auth.ModuleName, distr.ModuleName, staking.ModuleName, bank.ModuleName,
 		slashing.ModuleName, gov.ModuleName, mint.ModuleName, crisis.ModuleName,
 		ibc.ModuleName, genutil.ModuleName, evidence.ModuleName, transfer.ModuleName, nft.ModuleName,
-		connect.ModuleName,
+		connect.ModuleName, relayer.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
@@ -381,6 +396,7 @@ func NewSimApp(
 	app.scopedIBCKeeper = scopedIBCKeeper
 	app.scopedTransferKeeper = scopedTransferKeeper
 	app.scopedConnectKeeper = scopedConnectKeeper
+	app.scopedRelayerKeeper = scopedRelayerKeeper
 
 	return app
 }

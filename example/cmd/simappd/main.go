@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -26,8 +27,10 @@ import (
 )
 
 const flagInvCheckPeriod = "inv-check-period"
+const flagRelayer = "relayer"
 
 var invCheckPeriod uint
+var relayer bool
 
 func main() {
 	appCodec, cdc := app.MakeCodecs()
@@ -68,6 +71,7 @@ func main() {
 	executor := cli.PrepareBaseCmd(rootCmd, "GA", app.DefaultNodeHome)
 	rootCmd.PersistentFlags().UintVar(&invCheckPeriod, flagInvCheckPeriod,
 		0, "Assert registered invariants every N blocks")
+	rootCmd.PersistentFlags().BoolVar(&relayer, flagRelayer, false, "Start the chain as a Relayer chain (default false)")
 	err := executor.Execute()
 	if err != nil {
 		panic(err)
@@ -85,6 +89,8 @@ func newApp(logger log.Logger, db dbm.DB, traceStore io.Writer) abci.Application
 	for _, h := range viper.GetIntSlice(server.FlagUnsafeSkipUpgrades) {
 		skipUpgradeHeights[int64(h)] = true
 	}
+
+	getRelayerHandler(relayer)
 
 	return app.NewSimApp(
 		logger, db, traceStore, true, invCheckPeriod, skipUpgradeHeights,
@@ -113,4 +119,15 @@ func exportAppStateAndTMValidators(
 
 	gapp := app.NewSimApp(logger, db, traceStore, true, uint(1), map[int64]bool{}, "")
 	return gapp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
+}
+
+func getRelayerHandler(relayer bool) {
+	switch relayer {
+	case true:
+		fmt.Println("this is relay chain")
+	case false:
+		fmt.Println("this is nomarl chain")
+	default:
+		panic(fmt.Sprintln("unknown chain mode"))
+	}
 }
