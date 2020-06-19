@@ -46,5 +46,6 @@ type (
 
 	GenesisState = types.GenesisState
 
+	MsgLinkChains = types.MsgLinkChains
 	MsgSendPacket = types.MsgSendPacket
 )

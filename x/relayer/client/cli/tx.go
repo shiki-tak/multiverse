@@ -28,10 +28,32 @@ func GetTxCmd(cdc *codec.Codec) *cobra.Command {
 	}
 
 	relayerTxCmd.AddCommand(flags.PostCommands(
+		GetLinkCmd(cdc),
 		GetSendPacketCmd(cdc),
 	)...)
 
 	return relayerTxCmd
+}
+
+func GetLinkCmd(cdc *codec.Codec) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "link [path-name]",
+		Short: "create clients, connection, and channel between two configured chains with a configured path",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			inBuf := bufio.NewReader(cmd.InOrStdin())
+			txBldr := authtypes.NewTxBuilderFromCLI(inBuf).WithTxEncoder(authclient.GetTxEncoder(cdc))
+			cliCtx := context.NewCLIContextWithInput(inBuf).WithCodec(cdc).WithBroadcastMode(flags.BroadcastBlock)
+			sender := cliCtx.GetFromAddress()
+
+			msg := types.NewMsgLinkChains(args[0], sender)
+			if err := msg.ValidateBasic(); err != nil {
+				return err
+			}
+			return authclient.GenerateOrBroadcastMsgs(cliCtx, txBldr, []sdk.Msg{msg})
+		},
+	}
+	return cmd
 }
 
 // GetTransferTxCmd returns the command to create a NewMsgTransfer transaction

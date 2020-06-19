@@ -12,6 +12,8 @@ func NewHandler(k Keeper) sdk.Handler {
 	return func(ctx sdk.Context, msg sdk.Msg) (*sdk.Result, error) {
 		ctx = ctx.WithEventManager(sdk.NewEventManager())
 		switch msg := msg.(type) {
+		case MsgLinkChains:
+			return handleMsgLinkChains(ctx, k, msg)
 		case MsgSendPacket:
 			return handleMsgSendPacket(ctx, k, msg)
 		default:
@@ -19,6 +21,10 @@ func NewHandler(k Keeper) sdk.Handler {
 			return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
 		}
 	}
+}
+
+func handleMsgLinkChains(ctx sdk.Context, k Keeper, msg MsgLinkChains) (*sdk.Result, error) {
+	return nil, nil
 }
 
 func handleMsgSendPacket(ctx sdk.Context, k Keeper, msg MsgSendPacket) (*sdk.Result, error) {

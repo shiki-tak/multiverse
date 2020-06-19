@@ -4,6 +4,38 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
+type MsgLinkChains struct {
+	PathName string         `json:"path_name"`
+	Sender   sdk.AccAddress `json:"sender"`
+}
+
+func NewMsgLinkChains(pathName string, sender sdk.AccAddress) MsgLinkChains {
+	return MsgLinkChains{
+		PathName: pathName,
+		Sender:   sender,
+	}
+}
+
+func (msg MsgLinkChains) Route() string {
+	return RouterKey
+}
+
+func (msg MsgLinkChains) Type() string {
+	return TypeRelayer
+}
+
+func (msg MsgLinkChains) ValidateBasic() error {
+	return nil
+}
+
+func (msg MsgLinkChains) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+func (msg MsgLinkChains) GetSigners() []sdk.AccAddress {
+	return []sdk.AccAddress{msg.Sender}
+}
+
 type MsgSendPacket struct {
 	SrcPort    string         `json:"src_port"`
 	SrcChannel string         `json:"src_channel"`

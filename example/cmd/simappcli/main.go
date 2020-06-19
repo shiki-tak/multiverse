@@ -25,6 +25,9 @@ import (
 	bankcmd "github.com/cosmos/cosmos-sdk/x/bank/client/cli"
 
 	"github.com/shiki-tak/connect/example/app"
+
+	"github.com/shiki-tak/connect/x/relayer"
+	relayerconfig "github.com/shiki-tak/connect/x/relayer/config"
 )
 
 var (
@@ -74,6 +77,7 @@ func main() {
 		flags.LineBreak,
 		version.Cmd,
 		flags.NewCompletionCmd(rootCmd, true),
+		relayer.RootCmd(),
 	)
 
 	// Add flags and prefix all env exposed with GA
@@ -180,5 +184,10 @@ func initConfig(cmd *cobra.Command) error {
 	if err := viper.BindPFlag(cli.EncodingFlag, cmd.PersistentFlags().Lookup(cli.EncodingFlag)); err != nil {
 		return err
 	}
+	err = relayerconfig.InitConfig(cmd)
+	if err != nil {
+		return err
+	}
+
 	return viper.BindPFlag(cli.OutputFlag, cmd.PersistentFlags().Lookup(cli.OutputFlag))
 }
