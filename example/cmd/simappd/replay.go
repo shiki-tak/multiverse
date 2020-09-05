@@ -21,14 +21,14 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/baseapp"
 	"github.com/cosmos/cosmos-sdk/server"
-	"github.com/cosmos/cosmos-sdk/store"
+	storetypes "github.com/cosmos/cosmos-sdk/store/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
 func replayCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "replay <root-dir>",
-		Short: "Replay connect transactions",
+		Short: "Replay gaia transactions",
 		RunE: func(_ *cobra.Command, args []string) error {
 			return replayTxs(args[0])
 		},
@@ -42,12 +42,10 @@ func replayTxs(rootDir string) error {
 		// Copy the rootDir to a new directory, to preserve the old one.
 		fmt.Fprintln(os.Stderr, "Copying rootdir over")
 		oldRootDir := rootDir
-
 		rootDir = oldRootDir + "_replay"
 		if tmos.FileExists(rootDir) {
 			tmos.Exit(fmt.Sprintf("temporary copy dir %v already exists", rootDir))
 		}
-
 		if err := cpm.Copy(oldRootDir, rootDir); err != nil {
 			return err
 		}
@@ -94,10 +92,7 @@ func replayTxs(rootDir string) error {
 
 	// Application
 	fmt.Fprintln(os.Stderr, "Creating application")
-	gapp := app.NewSimApp(
-		ctx.Logger, appDB, traceStoreWriter, true, uint(1), map[int64]bool{}, "",
-		baseapp.SetPruning(store.PruneEverything), // nothing
-	)
+	gapp := app.NewWasmApp(ctx.Logger, appDB, traceStoreWriter, true, map[int64]bool{}, "", uint(1), app.GetEnabledProposals(), baseapp.SetPruning(storetypes.PruneEverything))
 
 	// Genesis
 	var genDocPath = filepath.Join(configDir, "genesis.json")
