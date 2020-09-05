@@ -22,7 +22,7 @@ import (
 	genutilcli "github.com/cosmos/cosmos-sdk/x/genutil/client/cli"
 	"github.com/cosmos/cosmos-sdk/x/staking"
 
-	"github.com/shiki-tak/connect/example/app"
+	"github.com/shiki-tak/multiverse/example/app"
 )
 
 const flagInvCheckPeriod = "inv-check-period"

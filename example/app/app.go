@@ -38,12 +38,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/staking"
 	"github.com/cosmos/cosmos-sdk/x/upgrade"
 	upgradeclient "github.com/cosmos/cosmos-sdk/x/upgrade/client"
-
-	"github.com/shiki-tak/connect/x/nft"
-
-	connect "github.com/shiki-tak/connect/x/connect"
-
-	relayer "github.com/shiki-tak/connect/x/relayer"
 )
 
 const appName = "SimApp"
@@ -76,12 +70,6 @@ var (
 		upgrade.AppModuleBasic{},
 		evidence.AppModuleBasic{},
 		transfer.AppModuleBasic{},
-
-		nft.AppModuleBasic{},
-
-		connect.AppModuleBasic{},
-
-		relayer.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -135,17 +123,10 @@ type SimApp struct {
 	evidenceKeeper   evidence.Keeper
 	transferKeeper   transfer.Keeper
 
-	NFTKeeper nft.Keeper
-
-	connectKeeper connect.Keeper
-
-	relayerKeeper relayer.Keeper
-
 	// make scoped keepers public for test purposes
 	scopedIBCKeeper      capability.ScopedKeeper
 	scopedTransferKeeper capability.ScopedKeeper
 	scopedConnectKeeper  capability.ScopedKeeper
-	scopedRelayerKeeper  capability.ScopedKeeper
 
 	// the module manager
 	mm *module.Manager
@@ -172,7 +153,6 @@ func NewSimApp(
 		mint.StoreKey, distr.StoreKey, slashing.StoreKey,
 		gov.StoreKey, params.StoreKey, ibc.StoreKey, upgrade.StoreKey,
 		evidence.StoreKey, transfer.StoreKey, capability.StoreKey,
-		nft.StoreKey, connect.StoreKey, relayer.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(params.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capability.MemStoreKey)
@@ -205,8 +185,6 @@ func NewSimApp(
 	app.capabilityKeeper = capability.NewKeeper(appCodec, keys[capability.StoreKey], memKeys[capability.MemStoreKey])
 	scopedIBCKeeper := app.capabilityKeeper.ScopeToModule(ibc.ModuleName)
 	scopedTransferKeeper := app.capabilityKeeper.ScopeToModule(transfer.ModuleName)
-	scopedConnectKeeper := app.capabilityKeeper.ScopeToModule(connect.ModuleName)
-	scopedRelayerKeeper := app.capabilityKeeper.ScopeToModule(relayer.ModuleName)
 
 	// add keepers
 	app.accountKeeper = auth.NewAccountKeeper(
@@ -233,8 +211,6 @@ func NewSimApp(
 		app.subspaces[crisis.ModuleName], invCheckPeriod, app.bankKeeper, auth.FeeCollectorName,
 	)
 	app.upgradeKeeper = upgrade.NewKeeper(skipUpgradeHeights, keys[upgrade.StoreKey], appCodec, home)
-
-	app.NFTKeeper = nft.NewKeeper(app.cdc, keys[nft.StoreKey])
 
 	// register the proposal types
 	govRouter := gov.NewRouter()
@@ -273,18 +249,6 @@ func NewSimApp(
 	ibcRouter := port.NewRouter()
 	ibcRouter.AddRoute(transfer.ModuleName, transferModule)
 
-	app.connectKeeper = connect.NewKeeper(appCodec, keys[connect.StoreKey], app.NFTKeeper,
-		app.ibcKeeper.ChannelKeeper, &app.ibcKeeper.PortKeeper, scopedConnectKeeper)
-
-	connectModule := connect.NewAppModule(app.connectKeeper)
-	ibcRouter.AddRoute(connect.ModuleName, connectModule)
-
-	app.relayerKeeper = relayer.NewKeeper(appCodec, keys[relayer.StoreKey], app.NFTKeeper,
-		app.ibcKeeper.ChannelKeeper, &app.ibcKeeper.PortKeeper, scopedRelayerKeeper)
-
-	relayerModule := relayer.NewAppModule(app.relayerKeeper)
-	ibcRouter.AddRoute(relayer.ModuleName, relayerModule)
-
 	app.ibcKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router
@@ -315,9 +279,6 @@ func NewSimApp(
 		ibc.NewAppModule(app.ibcKeeper),
 		params.NewAppModule(app.paramsKeeper),
 		transferModule,
-		connectModule,
-		relayerModule,
-		nft.NewAppModule(app.NFTKeeper, app.accountKeeper),
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -337,8 +298,7 @@ func NewSimApp(
 	app.mm.SetOrderInitGenesis(
 		capability.ModuleName, auth.ModuleName, distr.ModuleName, staking.ModuleName, bank.ModuleName,
 		slashing.ModuleName, gov.ModuleName, mint.ModuleName, crisis.ModuleName,
-		ibc.ModuleName, genutil.ModuleName, evidence.ModuleName, transfer.ModuleName, nft.ModuleName,
-		connect.ModuleName, relayer.ModuleName,
+		ibc.ModuleName, genutil.ModuleName, evidence.ModuleName, transfer.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.crisisKeeper)
@@ -395,8 +355,6 @@ func NewSimApp(
 
 	app.scopedIBCKeeper = scopedIBCKeeper
 	app.scopedTransferKeeper = scopedTransferKeeper
-	app.scopedConnectKeeper = scopedConnectKeeper
-	app.scopedRelayerKeeper = scopedRelayerKeeper
 
 	return app
 }
