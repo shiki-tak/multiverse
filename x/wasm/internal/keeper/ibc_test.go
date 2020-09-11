@@ -69,7 +69,7 @@ func TestBindingPortOnInstantiate(t *testing.T) {
 }
 
 // This should replace CreateTestInput when possible (likely after CosmWasm 1.0 is merged into this branch)
-func CreateTestApp(t *testing.T) *app.WasmApp {
+func CreateTestApp(t *testing.T) *app.SimApp {
 	tempDir, err := ioutil.TempDir("", "wasm")
 	require.NoError(t, err)
 	t.Cleanup(func() { os.RemoveAll(tempDir) })

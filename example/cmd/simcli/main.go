@@ -22,7 +22,7 @@ import (
 )
 
 // ClientName is set via build process
-const ClientName = "simappcli"
+const ClientName = "simcli"
 
 func main() {
 	// Configure cobra to sort commands
@@ -68,6 +68,7 @@ func main() {
 		rpc.StatusCommand(),
 		queryCmd(),
 		txCmd(),
+		ConfigCmd(app.DefaultCLIHome),
 		flags.LineBreak,
 		flags.LineBreak,
 		keys.Commands(app.DefaultNodeHome),

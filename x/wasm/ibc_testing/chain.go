@@ -68,7 +68,7 @@ var (
 type TestChain struct {
 	t *testing.T
 
-	App           *wasmd.WasmApp
+	App           *wasmd.SimApp
 	ChainID       string
 	LastHeader    ibctmtypes.Header // header for last block height committed
 	CurrentHeader tmproto.Header    // header for current block height

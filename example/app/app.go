@@ -80,12 +80,12 @@ import (
 	dbm "github.com/tendermint/tm-db"
 )
 
-const appName = "WasmApp"
+const appName = "SimpApp"
 
 // We pull these out so we can set them with LDFLAGS in the Makefile
 var (
-	CLIDir       = ".wasmcli"
-	NodeDir      = ".wasmd"
+	CLIDir       = ".simcli"
+	NodeDir      = ".simd"
 	Bech32Prefix = sdk.Bech32MainPrefix
 
 	// If EnabledSpecificProposals is "", and this is "true", then enable all x/wasm proposals.
@@ -180,10 +180,10 @@ var (
 )
 
 // Verify app interface at compile time
-var _ simapp.App = (*WasmApp)(nil)
+var _ simapp.App = (*SimApp)(nil)
 
-// WasmApp extended ABCI application
-type WasmApp struct {
+// SimApp extended ABCI application
+type SimApp struct {
 	*baseapp.BaseApp
 	cdc      *codec.LegacyAmino
 	appCodec codec.Marshaler
@@ -230,10 +230,10 @@ type WasmWrapper struct {
 	Wasm wasm.WasmConfig `mapstructure:"wasm"`
 }
 
-// NewWasmApp returns a reference to an initialized WasmApp.
+// NewWasmApp returns a reference to an initialized SimApp.
 func NewWasmApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest bool,
 	skipUpgradeHeights map[int64]bool, homeDir string, invCheckPeriod uint, enabledProposals []wasm.ProposalType,
-	baseAppOptions ...func(*bam.BaseApp)) *WasmApp {
+	baseAppOptions ...func(*bam.BaseApp)) *SimApp {
 
 	encodingConfig := MakeEncodingConfig()
 	appCodec, cdc := encodingConfig.Marshaler, encodingConfig.Amino
@@ -254,7 +254,7 @@ func NewWasmApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest b
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
 
-	app := &WasmApp{
+	app := &SimApp{
 		BaseApp:        bApp,
 		cdc:            cdc,
 		appCodec:       appCodec,
@@ -480,32 +480,32 @@ func NewWasmApp(logger log.Logger, db dbm.DB, traceStore io.Writer, loadLatest b
 }
 
 // Name returns the name of the App
-func (app *WasmApp) Name() string { return app.BaseApp.Name() }
+func (app *SimApp) Name() string { return app.BaseApp.Name() }
 
 // application updates every begin block
-func (app *WasmApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
+func (app *SimApp) BeginBlocker(ctx sdk.Context, req abci.RequestBeginBlock) abci.ResponseBeginBlock {
 	return app.mm.BeginBlock(ctx, req)
 }
 
 // EndBlocker application updates every end block
-func (app *WasmApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
+func (app *SimApp) EndBlocker(ctx sdk.Context, req abci.RequestEndBlock) abci.ResponseEndBlock {
 	return app.mm.EndBlock(ctx, req)
 }
 
 // InitChainer application update at chain initialization
-func (app *WasmApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
+func (app *SimApp) InitChainer(ctx sdk.Context, req abci.RequestInitChain) abci.ResponseInitChain {
 	var genesisState GenesisState
 	app.cdc.MustUnmarshalJSON(req.AppStateBytes, &genesisState)
 	return app.mm.InitGenesis(ctx, app.appCodec, genesisState)
 }
 
 // LoadHeight loads a particular height
-func (app *WasmApp) LoadHeight(height int64) error {
+func (app *SimApp) LoadHeight(height int64) error {
 	return app.LoadVersion(height)
 }
 
 // ModuleAccountAddrs returns all the app's module account addresses.
-func (app *WasmApp) ModuleAccountAddrs() map[string]bool {
+func (app *SimApp) ModuleAccountAddrs() map[string]bool {
 	modAccAddrs := make(map[string]bool)
 	for acc := range maccPerms {
 		modAccAddrs[authtypes.NewModuleAddress(acc).String()] = true
@@ -516,7 +516,7 @@ func (app *WasmApp) ModuleAccountAddrs() map[string]bool {
 
 // BlockedAddrs returns all the app's module account addresses that are not
 // allowed to receive external tokens.
-func (app *WasmApp) BlockedAddrs() map[string]bool {
+func (app *SimApp) BlockedAddrs() map[string]bool {
 	blockedAddrs := make(map[string]bool)
 	for acc := range maccPerms {
 		blockedAddrs[authtypes.NewModuleAddress(acc).String()] = !allowedReceivingModAcc[acc]
@@ -526,30 +526,30 @@ func (app *WasmApp) BlockedAddrs() map[string]bool {
 }
 
 // LegacyAmino returns the application's sealed codec.
-func (app *WasmApp) LegacyAmino() *codec.LegacyAmino {
+func (app *SimApp) LegacyAmino() *codec.LegacyAmino {
 	return app.cdc
 }
 
-func (app *WasmApp) AppCodec() codec.Marshaler {
+func (app *SimApp) AppCodec() codec.Marshaler {
 	return app.appCodec
 }
 
 // SimulationManager implements the SimulationApp interface
-func (app *WasmApp) SimulationManager() *module.SimulationManager {
+func (app *SimApp) SimulationManager() *module.SimulationManager {
 	return app.sm
 }
 
 // getSubspace returns a param subspace for a given module name.
 //
 // NOTE: This is solely to be used for testing purposes.
-func (app *WasmApp) getSubspace(moduleName string) paramstypes.Subspace {
+func (app *SimApp) getSubspace(moduleName string) paramstypes.Subspace {
 	subspace, _ := app.paramsKeeper.GetSubspace(moduleName)
 	return subspace
 }
 
 // RegisterAPIRoutes registers all application module routes with the provided
 // API server.
-func (app *WasmApp) RegisterAPIRoutes(apiSvr *api.Server) {
+func (app *SimApp) RegisterAPIRoutes(apiSvr *api.Server) {
 	clientCtx := apiSvr.ClientCtx
 	// amino is needed here for backwards compatibility of REST routes
 	clientCtx = clientCtx.WithJSONMarshaler(clientCtx.LegacyAmino)

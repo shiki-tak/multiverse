@@ -1,8 +1,8 @@
 .PHONY: build
 
 build: go.sum
-	go build -o build/simappd ./example/cmd/simappd
-	go build -o build/simappcli ./example/cmd/simappcli
+	go build -o build/simd ./example/cmd/simd
+	go build -o build/simcli ./example/cmd/simcli
 
 
 go.sum: go.mod

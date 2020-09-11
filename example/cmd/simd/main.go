@@ -72,7 +72,7 @@ func main() {
 		genutilcli.ValidateGenesisCmd(app.ModuleBasics, encodingConfig.TxConfig),
 		AddGenesisAccountCmd(app.DefaultNodeHome),
 		cli.NewCompletionCmd(rootCmd, true),
-		//testnetCmd(newApp.ModuleBasics, banktypes.GenesisBalancesIterator{}),
+		testnetCmd(app.ModuleBasics, banktypes.GenesisBalancesIterator{}),
 		replayCmd(),
 		debug.Cmd(),
 	)
@@ -131,16 +131,16 @@ func exportAppStateAndTMValidators(
 	logger log.Logger, db dbm.DB, traceStore io.Writer, height int64, forZeroHeight bool, jailWhiteList []string,
 ) (json.RawMessage, []tmtypes.GenesisValidator, *abci.ConsensusParams, error) {
 
-	var wasmApp *app.WasmApp
+	var simApp *app.SimApp
 	if height != -1 {
-		wasmApp = app.NewWasmApp(logger, db, traceStore, false, map[int64]bool{}, "", uint(1), app.GetEnabledProposals())
+		simApp = app.NewWasmApp(logger, db, traceStore, false, map[int64]bool{}, "", uint(1), app.GetEnabledProposals())
 
-		if err := wasmApp.LoadHeight(height); err != nil {
+		if err := simApp.LoadHeight(height); err != nil {
 			return nil, nil, nil, err
 		}
 	} else {
-		wasmApp = app.NewWasmApp(logger, db, traceStore, true, map[int64]bool{}, "", uint(1), app.GetEnabledProposals())
+		simApp = app.NewWasmApp(logger, db, traceStore, true, map[int64]bool{}, "", uint(1), app.GetEnabledProposals())
 	}
 
-	return wasmApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
+	return simApp.ExportAppStateAndValidators(forZeroHeight, jailWhiteList)
 }
